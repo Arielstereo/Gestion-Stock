@@ -30,43 +30,11 @@ export default function Home() {
   return (
     <div className="container mx-auto px-4 py-6 max-w-2xl mb-32">
       {/* Welcome Section */}
-      <div className="text-center mb-8">
+      <div className="text-center my-8">
         <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
           Gestión Stock Depósito
         </h1>
         <p className="text-2xl text-black capitalize">{currentMonthYear}</p>
-      </div>
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
-        <Card className="bg-blue-50 border-blue-200 w-full h-full mx-auto">
-          <CardHeader>
-            <CardDescription className="flex items-center justify-center text-md">
-              Registros
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-center text-blue-800">
-              {isLoading ? "..." : entries.length}
-            </p>
-          </CardContent>
-        </Card>
-        <Card className="bg-blue-50 border-blue-200 w-full h-full mx-auto">
-          <CardHeader>
-            <CardDescription className="flex items-center justify-center text-md">
-              Último registro
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-lg text-blue-800 font-semibold text-center capitalize">
-              {isLoading
-                ? "..."
-                : latestEntry
-                  ? formatEntryDate(latestEntry, "MMMM yyyy")
-                  : "Sin datos"}
-            </p>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Action Buttons */}
@@ -83,7 +51,7 @@ export default function Home() {
 
       {/* Latest Entry Preview */}
       {latestEntry && (
-        <Card className="mt-8">
+        <Card className="my-8 md:my-16">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Clock className="h-5 w-5" />
@@ -94,7 +62,7 @@ export default function Home() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="flex flex-col gap-2 text-sm">
               {PRODUCT_KEYS.map((key, i) => (
                 <div
                   key={key}
@@ -105,7 +73,7 @@ export default function Home() {
                   <span className="text-muted-foreground">
                     {PRODUCT_LABELS[key]}
                   </span>
-                  <span className="font-bold text-green-600">
+                  <span className="font-bold text-blue-600">
                     {latestEntry.finalStock?.[key] ??
                       latestEntry.operatorStock?.[key] ??
                       0}
