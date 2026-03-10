@@ -1,0 +1,20 @@
+{
+  "name": "Gestión Stock Depósito",
+  "short_name": "Stock",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e3a8a",
+  "icons": [
+    {
+      "src": "/tredi192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/tredi512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
