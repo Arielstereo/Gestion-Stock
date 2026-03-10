@@ -2,6 +2,7 @@ import { Noto_Kufi_Arabic } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import RegisterSW from "@/components/RegisterSW";
+import SplashWrapper from "@/components/SplashWrapper";
 
 const notoKufiArabic = Noto_Kufi_Arabic({
   variable: "--font-noto-kufi-arabic",
@@ -36,7 +37,9 @@ export default function RootLayout({ children }) {
       </head>
       <body className={`${notoKufiArabic.className} antialiased font-semibold`}>
         <RegisterSW />
-        <Navbar />
+        <SplashWrapper>
+          <Navbar />
+        </SplashWrapper>
         {children}
       </body>
     </html>
