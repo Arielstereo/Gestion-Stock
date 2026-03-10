@@ -85,7 +85,7 @@ export default function Home() {
         </Card>
       ) : (
         <div className="flex justify-center items-center mt-16 p-8 bg-amber-200 border border-amber-500 rounded-xl">
-          <span className="text-black text-lg">
+          <span className="text-black text-lg text-center">
             No hay stock cargado actualmente.
           </span>
         </div>
