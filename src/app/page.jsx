@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Clock } from "lucide-react";
+import { Clock, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -84,7 +84,8 @@ export default function Home() {
           </CardContent>
         </Card>
       ) : (
-        <div className="flex justify-center items-center mt-16 p-8 bg-amber-200 border border-amber-500 rounded-xl">
+        <div className="flex gap-2 justify-center items-center mt-16 p-8 bg-amber-200 border border-amber-500 rounded-xl">
+          <AlertCircle className="h-6 w-6 text-black mb-1" />
           <span className="text-black text-lg text-center">
             No hay stock cargado actualmente.
           </span>
