@@ -50,7 +50,7 @@ export default function Home() {
       </div>
 
       {/* Latest Entry Preview */}
-      {latestEntry && (
+      {latestEntry ? (
         <Card className="my-8 md:my-16">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -83,6 +83,12 @@ export default function Home() {
             </div>
           </CardContent>
         </Card>
+      ) : (
+        <div className="flex justify-center items-center mt-16 p-8 bg-amber-200 border border-amber-500 rounded-xl">
+          <span className="text-black text-lg">
+            No hay stock cargado actualmente.
+          </span>
+        </div>
       )}
     </div>
   );
