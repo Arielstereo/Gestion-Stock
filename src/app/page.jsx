@@ -53,7 +53,7 @@ function ProductRow({ productKey, entry, isLast }) {
       </div>
 
       {/* Subcategorías de tambores */}
-      {subs && (
+      {/* {subs && (
         <div className="flex gap-3 mt-1 pl-2">
           {subs.map(({ key, label }) => {
             const val = stock[key] ?? 0;
@@ -75,7 +75,7 @@ function ProductRow({ productKey, entry, isLast }) {
             );
           })}
         </div>
-      )}
+      )} */}
     </div>
   );
 }
