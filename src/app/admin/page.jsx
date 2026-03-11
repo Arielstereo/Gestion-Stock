@@ -32,7 +32,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useStock, PRODUCT_KEYS, PRODUCT_LABELS } from "@/hooks/useStock";
+import { useStock, PRODUCT_KEYS, PRODUCT_LABELS } from "@/context/StockContext";
 import { cn } from "@/lib/utils";
 
 // ── Constantes ────────────────────────────────────────────────────────────

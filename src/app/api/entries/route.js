@@ -3,13 +3,21 @@ import Entry from "@/models/Entry";
 import { NextResponse } from "next/server";
 
 const PRODUCT_KEYS = [
-  "tambores",
-  "palletsLivianos",
-  "palletsPesados",
+  "tamboresPcb",
+  "tamboresPesticida",
+  "tamboresPcbVigentes",
+  "tamboresPcbDaniados",
+  "tamboresPcbVencidos",
+  "tamboresPesticidaVigentes",
+  "tamboresPesticidaDaniados",
+  "tamboresPesticidaVencidos",
+  "palletsBigBag",
+  "palletsTambores",
   "tirantes",
-  "bigBag",
-  "absorventes",
-  "bines",
+  "tablas",
+  "absorbente",
+  "bolsonesPcb",
+  "bolsonesPesticida",
 ];
 
 export async function GET() {
@@ -72,17 +80,21 @@ export async function POST(request) {
       );
     }
 
-    // Calcular finalStock (sin pre-save hook)
+    // Normalizar operatorStock con todos los keys
     const stock = operatorStock || {};
-    const finalStock = {};
+    const normalizedStock = {};
     for (const key of PRODUCT_KEYS) {
-      finalStock[key] = Number(stock[key]) || 0;
+      normalizedStock[key] = Number(stock[key]) || 0;
     }
+
+    // finalStock = operatorStock (sin ajuste admin aún)
+    // Los subcampos de tambores se copian tal cual desde operatorStock
+    const finalStock = { ...normalizedStock };
 
     const newEntry = new Entry({
       month: monthNum,
       year: yearNum,
-      operatorStock: finalStock, // usamos los valores normalizados
+      operatorStock: normalizedStock,
       finalStock,
       operatorSubmittedAt: new Date(),
     });

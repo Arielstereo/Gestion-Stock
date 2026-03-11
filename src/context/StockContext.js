@@ -1,32 +1,45 @@
-import { useState, useCallback, useEffect } from "react";
+"use client";
+
+import {
+  createContext,
+  useState,
+  useCallback,
+  useEffect,
+  useContext,
+} from "react";
 import axios from "axios";
 
 export const PRODUCT_KEYS = [
-  "tambores",
+  "tamboresPcb",
+  "tamboresPesticida",
+  "palletsBigBag",
+  "palletsTambores",
   "tirantes",
-  "bines",
-  "bigBag",
-  "absorventes",
-  "palletsLivianos",
-  "palletsPesados",
+  "tablas",
+  "absorbente",
+  "bolsonesPcb",
+  "bolsonesPesticida",
 ];
 
 export const PRODUCT_LABELS = {
-  tambores: "Tambores 200",
+  tamboresPcb: "Tambores PCB",
+  tamboresPesticida: "Tambores Pesticida",
+  palletsBigBag: "Pallets para Big Bag",
+  palletsTambores: "Pallets para Tambores",
   tirantes: "Tirantes",
-  bines: "Bines",
-  bigBag: "Big Bag",
-  absorventes: "Absorbentes",
-  palletsLivianos: "Pallets Livianos",
-  palletsPesados: "Pallets Pesados",
+  tablas: "Tablas",
+  absorbente: "Absorbente",
+  bolsonesPcb: "Bolsones PCB",
+  bolsonesPesticida: "Bolsones Pesticida",
 };
 
-export function useStock() {
+const StockContext = createContext(null);
+
+export function StockProvider({ children }) {
   const [entries, setEntries] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // true hasta q termine el primer fetch
   const [error, setError] = useState(null);
 
-  // ─── Cargar todos los registros ──────────────────────────────────────────
   const loadEntries = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -41,12 +54,11 @@ export function useStock() {
     }
   }, []);
 
+  // Un solo fetch al montar el provider
   useEffect(() => {
     loadEntries();
   }, [loadEntries]);
 
-  // ─── Operario: crear nuevo registro mensual ───────────────────────────────
-  // operatorStock: { tambores: 10, palletsLivianos: 5, ... }
   const createOperatorEntry = useCallback(
     async (month, year, operatorStock) => {
       setError(null);
@@ -69,12 +81,10 @@ export function useStock() {
     [],
   );
 
-  // ─── Operario: actualizar conteo en un registro existente ────────────────
   const updateOperatorEntry = useCallback(async (id, operatorStock) => {
     setError(null);
     try {
       const res = await axios.put(`/api/entries/${id}`, { operatorStock });
-
       setEntries((prev) => prev.map((e) => (e._id === id ? res.data : e)));
       return { success: true, data: res.data };
     } catch (err) {
@@ -85,8 +95,6 @@ export function useStock() {
     }
   }, []);
 
-  // ─── Admin: aplicar ajuste (suma/resta) sobre el conteo del operario ─────
-  // adminAdjustment: { tambores: -2, bigBag: 5, ... } (puede ser negativo)
   const applyAdminAdjustment = useCallback(
     async (id, adminAdjustment, adminNote = "") => {
       setError(null);
@@ -107,7 +115,6 @@ export function useStock() {
     [],
   );
 
-  // ─── Eliminar registro ───────────────────────────────────────────────────
   const deleteEntry = useCallback(async (id) => {
     setError(null);
     try {
@@ -121,47 +128,56 @@ export function useStock() {
     }
   }, []);
 
-  // ─── Helpers ─────────────────────────────────────────────────────────────
-  const getSortedEntries = useCallback(() => {
-    return [...entries].sort((a, b) => {
-      if (a.year !== b.year) return b.year - a.year;
-      return b.month - a.month;
-    });
-  }, [entries]);
-
-  const getLatestEntry = useCallback(() => {
-    return getSortedEntries()[0] || null;
-  }, [getSortedEntries]);
-
-  const getEntryByMonthYear = useCallback(
-    (month, year) => {
-      return entries.find((e) => e.month === month && e.year === year) || null;
-    },
+  const getSortedEntries = useCallback(
+    () =>
+      [...entries].sort((a, b) =>
+        b.year !== a.year ? b.year - a.year : b.month - a.month,
+      ),
     [entries],
   );
 
-  // Calcular diferencia entre finalStock y operatorStock (para mostrar al admin)
+  const getLatestEntry = useCallback(
+    () => getSortedEntries()[0] ?? null,
+    [getSortedEntries],
+  );
+
+  const getEntryByMonthYear = useCallback(
+    (month, year) =>
+      entries.find((e) => e.month === month && e.year === year) ?? null,
+    [entries],
+  );
+
   const getDiff = useCallback((entry) => {
     if (!entry) return null;
-    const diff = {};
-    for (const key of PRODUCT_KEYS) {
-      diff[key] = entry.adminAdjustment?.[key] || 0;
-    }
-    return diff;
+    return Object.fromEntries(
+      PRODUCT_KEYS.map((k) => [k, entry.adminAdjustment?.[k] || 0]),
+    );
   }, []);
 
-  return {
-    entries,
-    isLoading,
-    error,
-    loadEntries,
-    createOperatorEntry,
-    updateOperatorEntry,
-    applyAdminAdjustment,
-    deleteEntry,
-    getSortedEntries,
-    getLatestEntry,
-    getEntryByMonthYear,
-    getDiff,
-  };
+  return (
+    <StockContext.Provider
+      value={{
+        entries,
+        isLoading,
+        error,
+        loadEntries,
+        createOperatorEntry,
+        updateOperatorEntry,
+        applyAdminAdjustment,
+        deleteEntry,
+        getSortedEntries,
+        getLatestEntry,
+        getEntryByMonthYear,
+        getDiff,
+      }}
+    >
+      {children}
+    </StockContext.Provider>
+  );
+}
+
+export function useStock() {
+  const ctx = useContext(StockContext);
+  if (!ctx) throw new Error("useStock debe usarse dentro de <StockProvider>");
+  return ctx;
 }

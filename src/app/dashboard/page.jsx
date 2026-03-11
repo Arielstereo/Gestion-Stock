@@ -27,8 +27,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useStock, PRODUCT_KEYS, PRODUCT_LABELS } from "@/hooks/useStock";
+import { useStock, PRODUCT_KEYS, PRODUCT_LABELS } from "@/context/StockContext";
 import { cn } from "@/lib/utils";
+
+// Detalle de subcategorías para mostrar en tabla y Excel
+const TAMBORES_DETAIL = {
+  tamboresPcb: [
+    { key: "tamboresPcbVigentes", label: "Vigentes" },
+    { key: "tamboresPcbDaniados", label: "Dañados" },
+    { key: "tamboresPcbVencidos", label: "Vencidos" },
+  ],
+  tamboresPesticida: [
+    { key: "tamboresPesticidaVigentes", label: "Vigentes" },
+    { key: "tamboresPesticidaDaniados", label: "Dañados" },
+    { key: "tamboresPesticidaVencidos", label: "Vencidos" },
+  ],
+};
 
 const formatEntryDate = (entry, fmt = "MMMM yyyy") => {
   const year = Number(entry?.year);
@@ -37,27 +51,27 @@ const formatEntryDate = (entry, fmt = "MMMM yyyy") => {
   return format(new Date(year, month - 1), fmt, { locale: es });
 };
 
-function DiffBadge({ value }) {
-  if (!value || value === 0)
-    return <span className="text-muted-foreground text-xs">-</span>;
-  const positive = value > 0;
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-0.5 text-xs font-semibold",
-        positive ? "text-green-600" : "text-red-600",
-      )}
-    >
-      {positive ? (
-        <TrendingUp className="h-3 w-3" />
-      ) : (
-        <TrendingDown className="h-3 w-3" />
-      )}
-      {positive ? "+" : ""}
-      {value}
-    </span>
-  );
-}
+// function DiffBadge({ value }) {
+//   if (!value || value === 0)
+//     return <span className="text-muted-foreground text-xs">-</span>;
+//   const positive = value > 0;
+//   return (
+//     <span
+//       className={cn(
+//         "inline-flex items-center gap-0.5 text-xs font-semibold",
+//         positive ? "text-green-600" : "text-red-600",
+//       )}
+//     >
+//       {positive ? (
+//         <TrendingUp className="h-3 w-3" />
+//       ) : (
+//         <TrendingDown className="h-3 w-3" />
+//       )}
+//       {positive ? "+" : ""}
+//       {value}
+//     </span>
+//   );
+// }
 
 const DashboardPage = () => {
   const { getSortedEntries, isLoading } = useStock();
@@ -65,22 +79,37 @@ const DashboardPage = () => {
   const entries = getSortedEntries();
 
   const exportEntry = (entry) => {
-    const periodoLabel =
-      formatEntryDate(entry).charAt(0).toUpperCase() +
-      formatEntryDate(entry).slice(1);
+    const periodoLabel = formatEntryDate(entry);
+    const capitalizado =
+      periodoLabel.charAt(0).toUpperCase() + periodoLabel.slice(1);
 
-    const wsData = [
-      ["Periodo", periodoLabel],
+    const rows = [
+      ["Periodo", capitalizado],
       [],
-      ["Producto", "Stock Actual"],
-      ...PRODUCT_KEYS.map((key) => [
-        PRODUCT_LABELS[key],
-        entry.finalStock?.[key] ?? entry.operatorStock?.[key] ?? 0,
-      ]),
+      ["Producto", "Conteo", "Compra/Consumo", "Stock Final"],
     ];
 
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    ws["!cols"] = [{ wch: 22 }, { wch: 18 }, { wch: 15 }, { wch: 14 }];
+    for (const key of PRODUCT_KEYS) {
+      const opVal = entry.operatorStock?.[key] ?? 0;
+      const adjVal = entry.adminAdjustment?.[key] ?? 0;
+      const finalVal = entry.finalStock?.[key];
+
+      rows.push([PRODUCT_LABELS[key], opVal, adjVal, finalVal]);
+
+      // Si tiene subcategorías, agregar filas indentadas debajo
+      const subs = TAMBORES_DETAIL[key];
+      if (subs) {
+        for (const sub of subs) {
+          const subOp = entry.operatorStock?.[sub.key] ?? 0;
+          // const subAdj = entry.adminAdjustment?.[sub.key] ?? " ";
+          // const subFinal = entry.finalStock?.[sub.key] ?? subOp;
+          rows.push([`   * ${sub.label}`, subOp]);
+        }
+      }
+    }
+
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    ws["!cols"] = [{ wch: 26 }, { wch: 18 }, { wch: 15 }, { wch: 14 }];
 
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Stock");
@@ -134,7 +163,6 @@ const DashboardPage = () => {
                 encontrado{entries.length !== 1 ? "s" : ""}
               </CardDescription>
             </div>
-
             <div className="relative w-full md:w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -152,7 +180,7 @@ const DashboardPage = () => {
             <div className="text-center py-12 text-muted-foreground">
               {entries.length === 0
                 ? "No hay registros de stock. Comenzá cargando el stock del mes actual."
-                : "No se encontraron resultados para tu busqueda."}
+                : "No se encontraron resultados para tu búsqueda."}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -214,18 +242,45 @@ const DashboardPage = () => {
                         {/* Valores por producto */}
                         {PRODUCT_KEYS.map((key) => {
                           const opVal = entry.operatorStock?.[key] ?? 0;
-                          const adjVal = entry.adminAdjustment?.[key] ?? 0;
+                          // const adjVal = entry.adminAdjustment?.[key] ?? 0;
                           const finalVal = entry.finalStock?.[key] ?? opVal;
+                          const subs = TAMBORES_DETAIL[key];
+
                           return (
                             <TableCell key={key} className="text-right">
-                              <div className="flex flex-col items-end gap-0.5">
+                              <div className="flex items-center justify-center">
+                                {/* Total */}
                                 <span className="font-medium">{finalVal}</span>
-                                {hasAdminAdj && adjVal !== 0 && (
-                                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                    <span>{opVal}</span>
-                                    <DiffBadge value={adjVal} />
+                                {/* {hasAdminAdj && adjVal !== 0 && (
+                                  <DiffBadge value={adjVal} />
+                                )} */}
+
+                                {/* Subcategorías de tambores */}
+                                {/* {subs && (
+                                  <div className="flex flex-col items-end gap-0 mt-0.5">
+                                    {subs.map(({ key: sk, label }) => {
+                                      const sv =
+                                        entry.finalStock?.[sk] ??
+                                        entry.operatorStock?.[sk] ??
+                                        0;
+                                      return (
+                                        <span
+                                          key={sk}
+                                          className={cn(
+                                            "text-[10px]",
+                                            label === "Dañados"
+                                              ? "text-red-500"
+                                              : label === "Vencidos"
+                                                ? "text-orange-500"
+                                                : "text-green-600",
+                                          )}
+                                        >
+                                          {label}: {sv}
+                                        </span>
+                                      );
+                                    })}
                                   </div>
-                                )}
+                                )} */}
                               </div>
                             </TableCell>
                           );
@@ -238,10 +293,10 @@ const DashboardPage = () => {
                             variant="ghost"
                             onClick={() => exportEntry(entry)}
                             title={`Exportar ${formatEntryDate(entry)}`}
-                            className="gap-1.5 text-green-700 hover:text-green-800 hover:bg-green-50 cursor-pointer"
+                            className="gap-1.5 text-green-700 hover:text-green-800 hover:bg-green-50"
                           >
                             <FileSpreadsheet className="h-4 w-4" />
-                            <span className="text-xs hidden sm:inline">
+                            <span className="text-xs hidden sm:inline cursor-pointer">
                               Excel
                             </span>
                           </Button>
@@ -251,11 +306,6 @@ const DashboardPage = () => {
                   })}
                 </TableBody>
               </Table>
-
-              <div className="mt-4 text-xs text-muted-foreground border-t pt-3">
-                En filas ajustadas se muestra el <strong>stock final</strong> y
-                debajo el <em>conteo del operario + ajuste admin</em>.
-              </div>
             </div>
           )}
         </CardContent>

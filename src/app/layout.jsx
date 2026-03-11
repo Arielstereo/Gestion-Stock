@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import RegisterSW from "@/components/RegisterSW";
 import SplashWrapper from "@/components/SplashWrapper";
+import { StockProvider } from "@/context/StockContext";
 
 const notoKufiArabic = Noto_Kufi_Arabic({
   variable: "--font-noto-kufi-arabic",
@@ -38,9 +39,10 @@ export default function RootLayout({ children }) {
       <body className={`${notoKufiArabic.className} antialiased font-semibold`}>
         <RegisterSW />
         <SplashWrapper>
-          <Navbar />
+          <StockProvider>
+            <Navbar>{children}</Navbar>
+          </StockProvider>
         </SplashWrapper>
-        {children}
       </body>
     </html>
   );
