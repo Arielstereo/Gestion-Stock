@@ -12,25 +12,27 @@ import axios from "axios";
 export const PRODUCT_KEYS = [
   "tamboresPcb",
   "tamboresPesticida",
+  "bolsonesPcb",
+  "bolsonesPesticida",
   "palletsBigBag",
   "palletsTambores",
   "tirantes",
   "tablas",
+  "bines",
   "absorbente",
-  "bolsonesPcb",
-  "bolsonesPesticida",
 ];
 
 export const PRODUCT_LABELS = {
   tamboresPcb: "Tambores PCB",
   tamboresPesticida: "Tambores Pesticida",
+  bolsonesPcb: "Bolsones PCB",
+  bolsonesPesticida: "Bolsones Pesticida",
   palletsBigBag: "Pallets para Big Bag",
   palletsTambores: "Pallets para Tambores",
   tirantes: "Tirantes",
   tablas: "Tablas",
+  bines: "Bines",
   absorbente: "Absorbente",
-  bolsonesPcb: "Bolsones PCB",
-  bolsonesPesticida: "Bolsones Pesticida",
 };
 
 const StockContext = createContext(null);

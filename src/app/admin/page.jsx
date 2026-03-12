@@ -219,7 +219,7 @@ export default function AdminPage() {
           Panel Administrador
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Registrá movimientos y aplicá ajustes al conteo del operario
+          Registrá movimientos y aplicá ajustes al conteo del operario.
         </p>
       </div>
 
@@ -230,9 +230,12 @@ export default function AdminPage() {
         </CardHeader>
         <CardContent>
           {entries.length === 0 ? (
-            <p className="text-muted-foreground text-sm">
-              No hay registros. El operario debe cargar el stock primero.
-            </p>
+            <div className="flex gap-2 justify-center items-center p-8 bg-blue-50 border border-blue-300 rounded-xl">
+              <AlertCircle className="h-6 w-6 text-blue-600 shrink-0" />
+              <span className="text-blue-600 text-base text-center">
+                No hay registros cargados.
+              </span>
+            </div>
           ) : (
             <Select
               value={selectedEntryId}
@@ -373,16 +376,18 @@ export default function AdminPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-2 font-medium text-muted-foreground">
+                    <th className="text-left py-2 font-medium text-black">
                       Producto
                     </th>
-                    <th className="text-right py-2 font-medium text-muted-foreground">
-                      Operario
+                    <th className="text-center py-2 font-medium text-black">
+                      Conteo *
                     </th>
-                    <th className="text-right py-2 font-medium text-muted-foreground">
+                    <th className="text-center py-2 font-medium text-black">
                       Ajuste
                     </th>
-                    <th className="text-right py-2 font-medium">Final</th>
+                    <th className="text-center py-2 font-bold text-black">
+                      Final
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -395,20 +400,29 @@ export default function AdminPage() {
                         <td className="py-2 text-muted-foreground">
                           {PRODUCT_LABELS[key]}
                         </td>
-                        <td className="py-2 text-right font-mono">{op}</td>
-                        <td className="py-2 text-right">
+                        <td className="py-2 text-center font-mono text-muted-foreground">
+                          {op}
+                        </td>
+                        <td className="py-2 text-center text-muted-foreground">
                           <DiffBadge value={adj} />
                         </td>
-                        <td className="py-2 text-right font-bold">{fin}</td>
+                        <td className="py-2 text-center font-bold">{fin}</td>
                       </tr>
                     );
                   })}
                 </tbody>
               </table>
+              <div className="mt-4">
+                <span className="text-xs text-yellow-800">
+                  *En el conteo realizado por el operario se incluyen productos
+                  dañados y/o vencidos. En el final solo se reflejan los
+                  productos vigentes.
+                </span>
+              </div>
 
               {selectedEntry.adminNote && (
                 <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                  <p className="text-xs text-yellow-700 font-medium flex items-center gap-1 mb-1">
+                  <p className="text-sm text-black font-medium flex items-center gap-1 mb-1">
                     <History className="h-3 w-3" /> Movimientos registrados:
                   </p>
                   <pre className="text-xs text-yellow-800 whitespace-pre-wrap font-sans">

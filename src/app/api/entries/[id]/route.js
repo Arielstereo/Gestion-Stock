@@ -12,13 +12,18 @@ const PRODUCT_KEYS = [
   "tamboresPesticidaVigentes",
   "tamboresPesticidaDaniados",
   "tamboresPesticidaVencidos",
+  "bolsonesPcb",
+  "bolsonesPesticida",
+  "bolsonesPcbVigentes",
+  "bolsonesPcbVencidos",
+  "bolsonesPesticidaVigentes",
+  "bolsonesPesticidaVencidos",
   "palletsBigBag",
   "palletsTambores",
   "tirantes",
   "tablas",
+  "bines",
   "absorbente",
-  "bolsonesPcb",
-  "bolsonesPesticida",
 ];
 
 // Subcampos de tambores — el admin no los ajusta, se copian tal cual del operario
@@ -31,10 +36,18 @@ const TAMBORES_SUB_KEYS = [
   "tamboresPesticidaVencidos",
 ];
 
+// Subcampos de bolsones — el admin no los ajusta, se copian tal cual del operario
+const BOLSONES_SUB_KEYS = [
+  "bolsonesPcbVigentes",
+  "bolsonesPcbVencidos",
+  "bolsonesPesticidaVigentes",
+  "bolsonesPesticidaVencidos",
+];
+
 const calcFinalStock = (op = {}, adj = {}) => {
   const final = {};
   for (const key of PRODUCT_KEYS) {
-    if (TAMBORES_SUB_KEYS.includes(key)) {
+    if (TAMBORES_SUB_KEYS.includes(key) || BOLSONES_SUB_KEYS.includes(key)) {
       // Subcategorías: copiar directo del operario sin sumar ajuste admin
       final[key] = op[key] || 0;
     } else {

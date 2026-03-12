@@ -60,10 +60,34 @@ const TAMBORES_GROUPS = [
   },
 ];
 
+const BOLSONES_GROUPS = [
+  {
+    key: "bolsonesPcb",
+    subs: [
+      { key: "bolsonesPcbVigentes", label: "Vigentes" },
+      { key: "bolsonesPcbVencidos", label: "Vencidos" },
+    ],
+  },
+  {
+    key: "bolsonesPesticida",
+    subs: [
+      { key: "bolsonesPesticidaVigentes", label: "Vigentes" },
+      { key: "bolsonesPesticidaVencidos", label: "Vencidos" },
+    ],
+  },
+];
+
 const TAMBORES_KEYS = TAMBORES_GROUPS.map((g) => g.key);
-const ALL_SUB_KEYS = TAMBORES_GROUPS.flatMap((g) => g.subs.map((s) => s.key));
+const BOLSONES_KEYS = BOLSONES_GROUPS.map((g) => g.key);
+
+const ALL_SUB_KEYS = [
+  ...TAMBORES_GROUPS.flatMap((g) => g.subs.map((s) => s.key)),
+  ...BOLSONES_GROUPS.flatMap((g) => g.subs.map((s) => s.key)),
+];
 // Productos simples (sin subcategorías)
-const SIMPLE_KEYS = PRODUCT_KEYS.filter((k) => !TAMBORES_KEYS.includes(k));
+const SIMPLE_KEYS = PRODUCT_KEYS.filter(
+  (k) => !TAMBORES_KEYS.includes(k) && !BOLSONES_KEYS.includes(k),
+);
 
 // Estado vacío del formulario
 const emptyStock = () => ({
@@ -81,6 +105,13 @@ const calcGroup = (products, group) =>
 const buildPayload = (products) => ({
   ...Object.fromEntries(SIMPLE_KEYS.map((k) => [k, Number(products[k]) || 0])),
   ...TAMBORES_GROUPS.reduce((acc, group) => {
+    acc[group.key] = calcGroup(products, group);
+    group.subs.forEach((s) => {
+      acc[s.key] = Number(products[s.key]) || 0;
+    });
+    return acc;
+  }, {}),
+  ...BOLSONES_GROUPS.reduce((acc, group) => {
     acc[group.key] = calcGroup(products, group);
     group.subs.forEach((s) => {
       acc[s.key] = Number(products[s.key]) || 0;
@@ -157,7 +188,7 @@ export default function StockEntryPage() {
       if (val === "" || val === null || val === undefined) {
         errors[key] = "Requerido";
       } else if (isNaN(Number(val)) || Number(val) < 0) {
-        errors[key] = "Debe ser >= 0";
+        errors[key] = "Debe ser mayor o igual a 0";
       }
     }
     setFieldErrors(errors);
@@ -308,9 +339,7 @@ export default function StockEntryPage() {
 
             {editMode && (
               <p className="text-xs text-orange-700 text-center flex items-center justify-center gap-1">
-                <Pencil className="h-3 w-3" />
-                Editando conteo existente — se reemplazarán los valores
-                guardados
+                Editando stock existente, se reemplazarán los valores guardados.
               </p>
             )}
           </div>
@@ -325,6 +354,57 @@ export default function StockEntryPage() {
           >
             {/* Grupos de tambores con subcategorías */}
             {TAMBORES_GROUPS.map((group) => {
+              const total = calcGroup(products, group);
+              return (
+                <div key={group.key} className="space-y-2">
+                  <div className="flex items-baseline gap-2">
+                    <Label className="text-base font-semibold">
+                      {PRODUCT_LABELS[group.key]}
+                    </Label>
+                    {total > 0 && (
+                      <span className="text-sm text-muted-foreground">
+                        (Total: {total})
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 pl-1">
+                    {group.subs.map(({ key, label }) => (
+                      <div key={key} className="space-y-1">
+                        <Label
+                          htmlFor={key}
+                          className="text-xs text-muted-foreground"
+                        >
+                          {label}
+                        </Label>
+                        <Input
+                          id={key}
+                          type="number"
+                          min="0"
+                          inputMode="numeric"
+                          value={products[key]}
+                          onChange={(e) =>
+                            handleProductChange(key, e.target.value)
+                          }
+                          placeholder="0"
+                          className={cn(
+                            "h-11 text-base",
+                            fieldErrors[key] && "border-destructive",
+                          )}
+                        />
+                        {fieldErrors[key] && (
+                          <p className="text-xs text-destructive">
+                            {fieldErrors[key]}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Grupos de bolsones con subcategorías */}
+            {BOLSONES_GROUPS.map((group) => {
               const total = calcGroup(products, group);
               return (
                 <div key={group.key} className="space-y-2">
@@ -418,8 +498,8 @@ export default function StockEntryPage() {
             className={cn(
               "w-full h-14 text-lg",
               editMode
-                ? "bg-orange-600 hover:bg-orange-700"
-                : "bg-blue-800 hover:bg-blue-600",
+                ? "bg-orange-600 hover:bg-orange-700 cursor-pointer"
+                : "bg-blue-800 hover:bg-blue-600 cursor-pointer",
             )}
           >
             {isLoading

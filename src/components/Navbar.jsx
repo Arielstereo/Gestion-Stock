@@ -41,7 +41,7 @@ const Navbar = ({ children }) => {
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors bg-primary-foreground/20 font-medium hover:bg-primary-foreground/10"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors bg-[#e07026] font-medium hover:bg-[#c65b1f] text-white"
             >
               <item.icon className="h-5 w-5" />
               <span>{item.label}</span>

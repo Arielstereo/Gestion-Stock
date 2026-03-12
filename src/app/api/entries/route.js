@@ -11,13 +11,18 @@ const PRODUCT_KEYS = [
   "tamboresPesticidaVigentes",
   "tamboresPesticidaDaniados",
   "tamboresPesticidaVencidos",
+  "bolsonesPcb",
+  "bolsonesPesticida",
+  "bolsonesPcbVigentes",
+  "bolsonesPcbVencidos",
+  "bolsonesPesticidaVigentes",
+  "bolsonesPesticidaVencidos",
   "palletsBigBag",
   "palletsTambores",
   "tirantes",
   "tablas",
+  "bines",
   "absorbente",
-  "bolsonesPcb",
-  "bolsonesPesticida",
 ];
 
 export async function GET() {
@@ -88,7 +93,7 @@ export async function POST(request) {
     }
 
     // finalStock = operatorStock (sin ajuste admin aún)
-    // Los subcampos de tambores se copian tal cual desde operatorStock
+    // Los subcampos se copian tal cual desde operatorStock
     const finalStock = { ...normalizedStock };
 
     const newEntry = new Entry({
