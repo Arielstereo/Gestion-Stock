@@ -130,6 +130,7 @@ export async function PUT(request, { params }) {
         year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
+        timeZone: "America/Argentina/Buenos_Aires",
       });
       entry.adminNote = prevNote
         ? `${prevNote}\n--- ${timestamp} ---\n${adminNote}`

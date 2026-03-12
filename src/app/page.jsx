@@ -80,7 +80,7 @@ export default function Home() {
       {latestEntry ? (
         <Card className="my-8 md:my-16 border border-slate-300 shadow-lg">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2 bg-blue-600 text-white px-3 py-2 rounded-md">
+            <CardTitle className="text-lg flex items-center gap-2 bg-blue-600 text-white py-3 px-4 rounded-md">
               <Clock className="h-5 w-5" />
               Último Stock Cargado
             </CardTitle>

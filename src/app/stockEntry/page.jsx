@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { useStock, PRODUCT_KEYS, PRODUCT_LABELS } from "@/context/StockContext";
 import { cn } from "@/lib/utils";
+import LoadingButton from "@/components/LoadingButton";
 
 const MONTHS = [
   "Enero",
@@ -491,23 +492,21 @@ export default function StockEntryPage() {
             </div>
           )}
 
-          <Button
+          <LoadingButton
             onClick={handleSubmit}
-            disabled={isLoading || isBlocked}
+            isLoading={isLoading}
+            loadingText="Guardando..."
+            disabled={isBlocked}
             size="lg"
             className={cn(
               "w-full h-14 text-lg",
               editMode
-                ? "bg-orange-600 hover:bg-orange-700 cursor-pointer"
-                : "bg-blue-800 hover:bg-blue-600 cursor-pointer",
+                ? "bg-orange-600 hover:bg-orange-700"
+                : "bg-blue-800 hover:bg-blue-600",
             )}
           >
-            {isLoading
-              ? "Guardando..."
-              : editMode
-                ? "Guardar cambios"
-                : "Guardar Stock"}
-          </Button>
+            {editMode ? "Guardar cambios" : "Guardar Stock"}
+          </LoadingButton>
         </CardContent>
       </Card>
     </div>

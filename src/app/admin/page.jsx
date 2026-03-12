@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/select";
 import { useStock, PRODUCT_KEYS, PRODUCT_LABELS } from "@/context/StockContext";
 import { cn } from "@/lib/utils";
+import LoadingButton from "@/components/LoadingButton";
 
 // ── Constantes ────────────────────────────────────────────────────────────
 const MOVEMENT_TYPES = [
@@ -656,15 +657,16 @@ export default function AdminPage() {
                 </div>
               )}
 
-              <Button
+              <LoadingButton
                 onClick={handleSubmit}
-                disabled={isLoading}
+                isLoading={isLoading}
+                loadingText="Guardando..."
                 size="lg"
-                className="w-full h-12 gap-2"
+                className="w-full h-12 gap-2 cursor-pointer"
               >
                 <SlidersHorizontal className="h-5 w-5" />
-                {isLoading ? "Guardando..." : "Aplicar Ajustes"}
-              </Button>
+                Aplicar Ajustes
+              </LoadingButton>
             </CardContent>
           </Card>
         </>
