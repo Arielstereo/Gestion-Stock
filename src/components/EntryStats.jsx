@@ -20,6 +20,40 @@ import { cn } from "@/lib/utils";
 // ── Configuración de subcategorías por producto ───────────────────────────
 const PRODUCT_GROUPS = [
   {
+    key: "bolsonesPcb",
+    subs: [
+      {
+        key: "bolsonesPcbVigentes",
+        label: "Vigentes",
+        icon: CheckCircle2,
+        color: "text-black",
+      },
+      {
+        key: "bolsonesPcbVencidos",
+        label: "Vencidos",
+        icon: XCircle,
+        color: "text-muted-foreground",
+      },
+    ],
+  },
+  {
+    key: "bolsonesPesticida",
+    subs: [
+      {
+        key: "bolsonesPesticidaVigentes",
+        label: "Vigentes",
+        icon: CheckCircle2,
+        color: "text-black",
+      },
+      {
+        key: "bolsonesPesticidaVencidos",
+        label: "Vencidos",
+        icon: XCircle,
+        color: "text-muted-foreground",
+      },
+    ],
+  },
+  {
     key: "tamboresPcb",
     subs: [
       {
@@ -65,56 +99,22 @@ const PRODUCT_GROUPS = [
       },
     ],
   },
-  {
-    key: "bolsonesPcb",
-    subs: [
-      {
-        key: "bolsonesPcbVigentes",
-        label: "Vigentes",
-        icon: CheckCircle2,
-        color: "text-black",
-      },
-      {
-        key: "bolsonesPcbVencidos",
-        label: "Vencidos",
-        icon: XCircle,
-        color: "text-muted-foreground",
-      },
-    ],
-  },
-  {
-    key: "bolsonesPesticida",
-    subs: [
-      {
-        key: "bolsonesPesticidaVigentes",
-        label: "Vigentes",
-        icon: CheckCircle2,
-        color: "text-black",
-      },
-      {
-        key: "bolsonesPesticidaVencidos",
-        label: "Vencidos",
-        icon: XCircle,
-        color: "text-muted-foreground",
-      },
-    ],
-  },
   // Productos simples (sin subcategorías)
+  { key: "absorbente" },
+  { key: "bines" },
   { key: "palletsBigBag" },
   { key: "palletsTambores" },
-  { key: "tirantes" },
   { key: "tablas" },
-  { key: "bines" },
-  { key: "absorbente" },
+  { key: "tirantes" },
 ];
 
 const SIMPLE_KEYS = [
+  "absorbente",
+  "bines",
   "palletsBigBag",
   "palletsTambores",
   "tirantes",
   "tablas",
-  "bines",
-  "absorbente",
 ];
 
 const formatDate = (entry) => {

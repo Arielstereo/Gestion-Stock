@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { format, setMonth, setYear } from "date-fns";
-import { es } from "date-fns/locale";
+import { es, is } from "date-fns/locale";
 import { CalendarIcon, AlertCircle, CheckCircle2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -147,6 +147,7 @@ export default function StockEntryPage() {
   const [success, setSuccess] = useState(false);
   const [conflictEntry, setConflictEntry] = useState(null);
   const [editMode, setEditMode] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selectedMonthLabel = format(
     setYear(setMonth(new Date(), selectedMonth - 1), selectedYear),
@@ -199,6 +200,7 @@ export default function StockEntryPage() {
   const handleSubmit = async () => {
     if (!validateForm()) return;
     setApiError("");
+    setIsSubmitting(true);
 
     const payload = buildPayload(products);
 
@@ -206,6 +208,8 @@ export default function StockEntryPage() {
       editMode && conflictEntry
         ? await updateOperatorEntry(conflictEntry._id, payload)
         : await createOperatorEntry(selectedMonth, selectedYear, payload);
+
+    setIsSubmitting(false);
 
     if (result.success) {
       setSuccess(true);
@@ -494,7 +498,7 @@ export default function StockEntryPage() {
 
           <LoadingButton
             onClick={handleSubmit}
-            isLoading={isLoading}
+            isLoading={isSubmitting}
             loadingText="Guardando..."
             disabled={isBlocked}
             size="lg"

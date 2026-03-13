@@ -10,16 +10,15 @@ import {
 import axios from "axios";
 
 export const PRODUCT_KEYS = [
-  "tamboresPcb",
-  "tamboresPesticida",
+  "absorbente",
   "bolsonesPcb",
   "bolsonesPesticida",
   "palletsBigBag",
   "palletsTambores",
-  "tirantes",
   "tablas",
-  "bines",
-  "absorbente",
+  "tamboresPcb",
+  "tamboresPesticida",
+  "tirantes",
 ];
 
 export const PRODUCT_LABELS = {

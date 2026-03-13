@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Home, Package, BarChart3, Settings } from "lucide-react";
 import Image from "next/image";
+import RefreshButton from "./RefreshButton";
 
 const navItems = [
   { href: "/", icon: Home, label: "Inicio", mobileOnly: false },
@@ -47,6 +48,7 @@ const Navbar = ({ children }) => {
               <span>{item.label}</span>
             </Link>
           ))}
+          <RefreshButton />
         </nav>
       </header>
 

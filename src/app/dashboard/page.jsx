@@ -174,7 +174,7 @@ const DashboardPage = () => {
 
                       {/* Preview rápido de los totales principales */}
                       <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground mt-2">
-                        {TABLE_KEYS.map((key) => {
+                        {TABLE_KEYS.slice(0, 4).map((key) => {
                           const val =
                             entry.finalStock?.[key] ??
                             entry.operatorStock?.[key] ??
@@ -189,6 +189,11 @@ const DashboardPage = () => {
                             </span>
                           );
                         })}
+                        {TABLE_KEYS.length > 4 && (
+                          <span className="text-muted-foreground">
+                            +{TABLE_KEYS.length - 4} más...
+                          </span>
+                        )}
 
                         <span className="text-blue-600 font-medium">
                           Ver detalle{" "}

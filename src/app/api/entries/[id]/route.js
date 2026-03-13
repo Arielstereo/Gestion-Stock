@@ -143,6 +143,17 @@ export async function PUT(request, { params }) {
       entry.adminAdjustment.toObject(),
     );
 
+    // Validar que ningún producto quede en negativo
+    const negatives = Object.entries(newFinal)
+      .filter(([, v]) => v < 0)
+      .map(([k]) => k);
+    if (negatives.length > 0) {
+      return NextResponse.json(
+        { error: "El stock final no puede ser negativo", fields: negatives },
+        { status: 422 },
+      );
+    }
+    entry.finalStock = newFinal;
     const saved = await entry.save();
     return NextResponse.json(saved);
   } catch (error) {

@@ -53,6 +53,18 @@ const emptyMovement = () => ({
   project: "",
 });
 
+// Para tambores y bolsones mostrar solo vigentes en columna "Operario"
+const VIGENTES_MAP = {
+  tamboresPcb: "tamboresPcbVigentes",
+  tamboresPesticida: "tamboresPesticidaVigentes",
+  bolsonesPcb: "bolsonesPcbVigentes",
+  bolsonesPesticida: "bolsonesPesticidaVigentes",
+};
+const getOpValue = (stock, key) => {
+  const subKey = VIGENTES_MAP[key];
+  return subKey ? (stock?.[subKey] ?? 0) : (stock?.[key] ?? 0);
+};
+
 // ── Helpers ───────────────────────────────────────────────────────────────
 const formatEntryDate = (entry, fmt = "MMMM yyyy") => {
   const year = Number(entry?.year);
@@ -102,6 +114,8 @@ export default function AdminPage() {
   const [fieldErrors, setFieldErrors] = useState([{}]);
   const [apiError, setApiError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [negativeFields, setNegativeFields] = useState([]);
 
   const selectedEntry = entries.find((e) => e._id === selectedEntryId) || null;
 
@@ -193,17 +207,49 @@ export default function AdminPage() {
       .join("\n");
 
   // ── Submit ─────────────────────────────────────────────────────────────
+  const validateNegatives = (payload) => {
+    const VIGENTES_MAP = {
+      tamboresPcb: "tamboresPcbVigentes",
+      tamboresPesticida: "tamboresPesticidaVigentes",
+      bolsonesPcb: "bolsonesPcbVigentes",
+      bolsonesPesticida: "bolsonesPesticidaVigentes",
+    };
+    const negatives = [];
+    for (const key of PRODUCT_KEYS) {
+      const subKey = VIGENTES_MAP[key];
+      const current = subKey
+        ? (selectedEntry.operatorStock?.[subKey] ?? 0)
+        : (selectedEntry.operatorStock?.[key] ?? 0);
+      const prevAdj = selectedEntry.adminAdjustment?.[key] ?? 0;
+      const newAdj = payload[key] ?? 0;
+      if (current + prevAdj + newAdj < 0) negatives.push(key);
+    }
+    return negatives;
+  };
+
   const handleSubmit = async () => {
     if (!selectedEntry || !validate()) return;
     setApiError("");
     setSuccess(false);
+    setNegativeFields([]);
+
+    const payload = buildPayload();
+    const negatives = validateNegatives(payload);
+    if (negatives.length > 0) {
+      setNegativeFields(negatives);
+      return;
+    }
+
+    setIsSubmitting(true);
     const result = await applyAdminAdjustment(
       selectedEntry._id,
-      buildPayload(),
+      payload,
       buildNote(),
     );
+    setIsSubmitting(false);
     if (result.success) {
       setSuccess(true);
+      setNegativeFields([]);
       setMovements([emptyMovement()]);
       setFieldErrors([{}]);
     } else {
@@ -281,8 +327,9 @@ export default function AdminPage() {
                   </span>
                 </CardTitle>
                 <CardDescription className="text-yellow-700">
-                  El conteo del operario difiere del stock final del mes
-                  anterior. Revisá si corresponde aplicar un ajuste.
+                  ¡El conteo del operario difiere del stock final del mes
+                  anterior! Revisá las diferencias antes de registrar
+                  movimientos para evitar errores.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -381,7 +428,7 @@ export default function AdminPage() {
                       Producto
                     </th>
                     <th className="text-center py-2 font-medium text-black">
-                      Conteo *
+                      Conteo
                     </th>
                     <th className="text-center py-2 font-medium text-black">
                       Ajuste
@@ -393,7 +440,7 @@ export default function AdminPage() {
                 </thead>
                 <tbody>
                   {PRODUCT_KEYS.map((key) => {
-                    const op = selectedEntry.operatorStock?.[key] ?? 0;
+                    const op = getOpValue(selectedEntry.operatorStock, key);
                     const adj = selectedEntry.adminAdjustment?.[key] ?? 0;
                     const fin = selectedEntry.finalStock?.[key] ?? op;
                     return (
@@ -401,10 +448,8 @@ export default function AdminPage() {
                         <td className="py-2 text-muted-foreground">
                           {PRODUCT_LABELS[key]}
                         </td>
-                        <td className="py-2 text-center font-mono text-muted-foreground">
-                          {op}
-                        </td>
-                        <td className="py-2 text-center text-muted-foreground">
+                        <td className="py-2 text-center font-mono">{op}</td>
+                        <td className="py-2 text-center">
                           <DiffBadge value={adj} />
                         </td>
                         <td className="py-2 text-center font-bold">{fin}</td>
@@ -413,13 +458,6 @@ export default function AdminPage() {
                   })}
                 </tbody>
               </table>
-              <div className="mt-4">
-                <span className="text-xs text-yellow-800">
-                  *En el conteo realizado por el operario se incluyen productos
-                  dañados y/o vencidos. En el final solo se reflejan los
-                  productos vigentes.
-                </span>
-              </div>
 
               {selectedEntry.adminNote && (
                 <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
@@ -642,6 +680,20 @@ export default function AdminPage() {
                 Agregar otro movimiento
               </Button>
 
+              {negativeFields.length > 0 && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 space-y-1">
+                  <p className="text-sm text-red-700 font-medium flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 shrink-0" />
+                    El ajuste dejaría stock negativo en:
+                  </p>
+                  <ul className="text-sm text-red-700 list-disc pl-5">
+                    {negativeFields.map((k) => (
+                      <li key={k}>{PRODUCT_LABELS[k]}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {apiError && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
@@ -659,7 +711,7 @@ export default function AdminPage() {
 
               <LoadingButton
                 onClick={handleSubmit}
-                isLoading={isLoading}
+                isLoading={isSubmitting}
                 loadingText="Guardando..."
                 size="lg"
                 className="w-full h-12 gap-2 cursor-pointer"
