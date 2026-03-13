@@ -24,13 +24,16 @@ const SUB_KEYS = new Set([
   "tamboresPcbVigentes",
   "tamboresPcbDaniados",
   "tamboresPcbVencidos",
-  "tamboresPesticidaVigentes",
-  "tamboresPesticidaDaniados",
-  "tamboresPesticidaVencidos",
+  "tamboresPesticidasVigentes",
+  "tamboresPesticidasDaniados",
+  "tamboresPesticidasVencidos",
+  "sobreTamboresVigentes",
+  "sobreTamboresDaniados",
+  "sobreTamboresVencidos",
   "bolsonesPcbVigentes",
   "bolsonesPcbVencidos",
-  "bolsonesPesticidaVigentes",
-  "bolsonesPesticidaVencidos",
+  "bolsonesPesticidasVigentes",
+  "bolsonesPesticidasVencidos",
 ]);
 const TABLE_KEYS = PRODUCT_KEYS.filter((k) => !SUB_KEYS.has(k));
 

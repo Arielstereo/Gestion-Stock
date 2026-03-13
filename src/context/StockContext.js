@@ -2,36 +2,39 @@
 
 import {
   createContext,
+  useContext,
   useState,
   useCallback,
   useEffect,
-  useContext,
 } from "react";
 import axios from "axios";
 
 export const PRODUCT_KEYS = [
   "absorbente",
+  "bines",
   "bolsonesPcb",
-  "bolsonesPesticida",
+  "bolsonesPesticidas",
   "palletsBigBag",
   "palletsTambores",
+  "sobreTambores",
   "tablas",
   "tamboresPcb",
-  "tamboresPesticida",
+  "tamboresPesticidas",
   "tirantes",
 ];
 
 export const PRODUCT_LABELS = {
   tamboresPcb: "Tambores PCB",
-  tamboresPesticida: "Tambores Pesticida",
-  bolsonesPcb: "Bolsones PCB",
-  bolsonesPesticida: "Bolsones Pesticida",
+  tamboresPesticidas: "Tambores Pesticidas",
+  sobreTambores: "Sobretambores",
+  bines: "Bines",
   palletsBigBag: "Pallets para Big Bag",
   palletsTambores: "Pallets para Tambores",
   tirantes: "Tirantes",
   tablas: "Tablas",
-  bines: "Bines",
   absorbente: "Absorbente",
+  bolsonesPcb: "Bolsones PCB",
+  bolsonesPesticidas: "Bolsones Pesticidas",
 };
 
 const StockContext = createContext(null);
@@ -177,6 +180,7 @@ export function StockProvider({ children }) {
   );
 }
 
+// Mismo hook que antes — los componentes no cambian nada
 export function useStock() {
   const ctx = useContext(StockContext);
   if (!ctx) throw new Error("useStock debe usarse dentro de <StockProvider>");

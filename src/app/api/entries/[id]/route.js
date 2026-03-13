@@ -4,51 +4,56 @@ import Entry from "@/models/Entry";
 import mongoose from "mongoose";
 
 const PRODUCT_KEYS = [
+  "sobreTambores",
+  "sobreTamboresVigentes",
+  "sobreTamboresDaniados",
+  "sobreTamboresVencidos",
   "tamboresPcb",
-  "tamboresPesticida",
+  "tamboresPesticidas",
   "tamboresPcbVigentes",
   "tamboresPcbDaniados",
   "tamboresPcbVencidos",
-  "tamboresPesticidaVigentes",
-  "tamboresPesticidaDaniados",
+  "tamboresPesticidasVigentes",
+  "tamboresPesticidasDaniados",
   "tamboresPesticidaVencidos",
   "bolsonesPcb",
-  "bolsonesPesticida",
+  "bolsonesPesticidas",
   "bolsonesPcbVigentes",
   "bolsonesPcbVencidos",
-  "bolsonesPesticidaVigentes",
-  "bolsonesPesticidaVencidos",
+  "bolsonesPesticidasVigentes",
+  "bolsonesPesticidasVencidos",
+  "absorbente",
+  "bines",
   "palletsBigBag",
   "palletsTambores",
-  "tirantes",
+  "sobreTambores",
   "tablas",
-  "bines",
-  "absorbente",
+  "tirantes",
 ];
 
-// Subcampos de tambores — el admin no los ajusta, se copian tal cual del operario
 const TAMBORES_SUB_KEYS = [
+  "sobreTamboresVigentes",
+  "sobreTamboresDaniados",
+  "sobreTamboresVencidos",
   "tamboresPcbVigentes",
   "tamboresPcbDaniados",
   "tamboresPcbVencidos",
-  "tamboresPesticidaVigentes",
-  "tamboresPesticidaDaniados",
-  "tamboresPesticidaVencidos",
+  "tamboresPesticidasVigentes",
+  "tamboresPesticidasDaniados",
+  "tamboresPesticidasVencidos",
 ];
 
-// Subcampos de bolsones — el admin no los ajusta, se copian tal cual del operario
 const BOLSONES_SUB_KEYS = [
   "bolsonesPcbVigentes",
   "bolsonesPcbVencidos",
-  "bolsonesPesticidaVigentes",
-  "bolsonesPesticidaVencidos",
+  "bolsonesPesticidasVigentes",
+  "bolsonesPesticidasVencidos",
 ];
 
 const calcFinalStock = (op = {}, adj = {}) => {
   const final = {};
   for (const key of PRODUCT_KEYS) {
     if (TAMBORES_SUB_KEYS.includes(key) || BOLSONES_SUB_KEYS.includes(key)) {
-      // Subcategorías: copiar directo del operario sin sumar ajuste admin
       final[key] = op[key] || 0;
     } else {
       final[key] = (op[key] || 0) + (adj[key] || 0);
@@ -82,7 +87,6 @@ export async function GET(request, { params }) {
 }
 
 // PUT /api/entries/[id]
-// Body: { operatorStock?, adminAdjustment?, adminNote? }
 export async function PUT(request, { params }) {
   await dbConnection();
   const { id } = await params;
@@ -101,7 +105,6 @@ export async function PUT(request, { params }) {
         { status: 404 },
       );
 
-    // Operario: reemplaza su conteo (siempre es el conteo actual)
     if (operatorStock !== undefined) {
       entry.operatorStock = {
         ...entry.operatorStock.toObject(),
@@ -110,7 +113,6 @@ export async function PUT(request, { params }) {
       entry.operatorSubmittedAt = new Date();
     }
 
-    // Admin: ACUMULA sobre el ajuste anterior, no lo reemplaza
     if (adminAdjustment !== undefined) {
       const prevAdj = entry.adminAdjustment.toObject();
       const accumulated = {};
@@ -121,7 +123,6 @@ export async function PUT(request, { params }) {
       entry.adminSubmittedAt = new Date();
     }
 
-    // Admin: ACUMULA la nota en vez de reemplazarla
     if (adminNote !== undefined && adminNote.trim() !== "") {
       const prevNote = entry.adminNote || "";
       const timestamp = new Date().toLocaleDateString("es-AR", {
@@ -137,13 +138,12 @@ export async function PUT(request, { params }) {
         : `--- ${timestamp} ---\n${adminNote}`;
     }
 
-    // Recalcular finalStock con el ajuste acumulado
-    entry.finalStock = calcFinalStock(
+    // Calcular y validar que no quede nada negativo
+    const newFinal = calcFinalStock(
       entry.operatorStock.toObject(),
       entry.adminAdjustment.toObject(),
     );
 
-    // Validar que ningún producto quede en negativo
     const negatives = Object.entries(newFinal)
       .filter(([, v]) => v < 0)
       .map(([k]) => k);
@@ -153,6 +153,7 @@ export async function PUT(request, { params }) {
         { status: 422 },
       );
     }
+
     entry.finalStock = newFinal;
     const saved = await entry.save();
     return NextResponse.json(saved);

@@ -52,13 +52,13 @@ const emptyMovement = () => ({
   service: "",
   project: "",
 });
-
 // Para tambores y bolsones mostrar solo vigentes en columna "Operario"
 const VIGENTES_MAP = {
+  sobreTambores: "sobreTamboresVigentes",
   tamboresPcb: "tamboresPcbVigentes",
-  tamboresPesticida: "tamboresPesticidaVigentes",
+  tamboresPesticidas: "tamboresPesticidasVigentes",
   bolsonesPcb: "bolsonesPcbVigentes",
-  bolsonesPesticida: "bolsonesPesticidaVigentes",
+  bolsonesPesticidas: "bolsonesPesticidasVigentes",
 };
 const getOpValue = (stock, key) => {
   const subKey = VIGENTES_MAP[key];
@@ -137,7 +137,7 @@ export default function AdminPage() {
     for (const key of PRODUCT_KEYS) {
       const prevFinal =
         prevEntry.finalStock?.[key] ?? prevEntry.operatorStock?.[key] ?? 0;
-      const currOp = selectedEntry.operatorStock?.[key] ?? 0;
+      const currOp = getOpValue(selectedEntry.operatorStock, key);
       const diff = currOp - prevFinal;
       diffs[key] = { prevFinal, currOp, diff };
       if (diff !== 0) hasAnyDiff = true;
@@ -209,6 +209,7 @@ export default function AdminPage() {
   // ── Submit ─────────────────────────────────────────────────────────────
   const validateNegatives = (payload) => {
     const VIGENTES_MAP = {
+      sobreTambores: "sobreTamboresVigentes",
       tamboresPcb: "tamboresPcbVigentes",
       tamboresPesticida: "tamboresPesticidaVigentes",
       bolsonesPcb: "bolsonesPcbVigentes",
@@ -266,7 +267,7 @@ export default function AdminPage() {
           Panel Administrador
         </h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Registrá movimientos y aplicá ajustes al conteo del operario.
+          Registrá movimientos y aplicá ajustes al conteo del operario
         </p>
       </div>
 
@@ -277,12 +278,9 @@ export default function AdminPage() {
         </CardHeader>
         <CardContent>
           {entries.length === 0 ? (
-            <div className="flex gap-2 justify-center items-center p-8 bg-blue-50 border border-blue-300 rounded-xl">
-              <AlertCircle className="h-6 w-6 text-blue-600 shrink-0" />
-              <span className="text-blue-600 text-base text-center">
-                No hay registros cargados.
-              </span>
-            </div>
+            <p className="text-muted-foreground text-sm">
+              No hay registros. El operario debe cargar el stock primero.
+            </p>
           ) : (
             <Select
               value={selectedEntryId}
@@ -327,9 +325,8 @@ export default function AdminPage() {
                   </span>
                 </CardTitle>
                 <CardDescription className="text-yellow-700">
-                  ¡El conteo del operario difiere del stock final del mes
-                  anterior! Revisá las diferencias antes de registrar
-                  movimientos para evitar errores.
+                  El conteo del mes actual difiere del stock final del mes
+                  anterior.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -392,11 +389,10 @@ export default function AdminPage() {
           {prevEntry && !monthDiffs?.hasAnyDiff && (
             <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
               <CheckCircle2 className="h-4 w-4 shrink-0" />
-              El conteo del operario coincide con el stock final de{" "}
+              El conteo del mes actual coincide con el stock final de
               <span className="font-medium capitalize">
                 {formatEntryDate(prevEntry)}
               </span>
-              .
             </div>
           )}
 
@@ -424,18 +420,16 @@ export default function AdminPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-2 font-medium text-black">
+                    <th className="text-left py-2 font-medium text-muted-foreground">
                       Producto
                     </th>
-                    <th className="text-center py-2 font-medium text-black">
-                      Conteo
+                    <th className="text-right py-2 font-medium text-muted-foreground">
+                      Operario
                     </th>
-                    <th className="text-center py-2 font-medium text-black">
+                    <th className="text-right py-2 font-medium text-muted-foreground">
                       Ajuste
                     </th>
-                    <th className="text-center py-2 font-bold text-black">
-                      Final
-                    </th>
+                    <th className="text-right py-2 font-medium">Final</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -448,11 +442,11 @@ export default function AdminPage() {
                         <td className="py-2 text-muted-foreground">
                           {PRODUCT_LABELS[key]}
                         </td>
-                        <td className="py-2 text-center font-mono">{op}</td>
-                        <td className="py-2 text-center">
+                        <td className="py-2 text-right font-mono">{op}</td>
+                        <td className="py-2 text-right">
                           <DiffBadge value={adj} />
                         </td>
-                        <td className="py-2 text-center font-bold">{fin}</td>
+                        <td className="py-2 text-right font-bold">{fin}</td>
                       </tr>
                     );
                   })}
@@ -461,7 +455,7 @@ export default function AdminPage() {
 
               {selectedEntry.adminNote && (
                 <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                  <p className="text-sm text-black font-medium flex items-center gap-1 mb-1">
+                  <p className="text-xs text-yellow-700 font-medium flex items-center gap-1 mb-1">
                     <History className="h-3 w-3" /> Movimientos registrados:
                   </p>
                   <pre className="text-xs text-yellow-800 whitespace-pre-wrap font-sans">
@@ -624,7 +618,7 @@ export default function AdminPage() {
                     {/* Proyecto */}
                     <div className="space-y-1 sm:col-span-2">
                       <Label className="text-xs">
-                        Proyecto/Proveedor
+                        Proyecto{" "}
                         <span className="text-muted-foreground font-normal">
                           (opcional)
                         </span>
@@ -714,7 +708,7 @@ export default function AdminPage() {
                 isLoading={isSubmitting}
                 loadingText="Guardando..."
                 size="lg"
-                className="w-full h-12 gap-2 cursor-pointer"
+                className="w-full h-12 gap-2"
               >
                 <SlidersHorizontal className="h-5 w-5" />
                 Aplicar Ajustes

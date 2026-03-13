@@ -4,31 +4,32 @@ const ProductSnapshotSchema = new mongoose.Schema(
   {
     // Totales por tipo de tambor
     tamboresPcb: { type: Number, default: 0 },
-    tamboresPesticida: { type: Number, default: 0 },
+    tamboresPesticidas: { type: Number, default: 0 },
     // Detalle tambores PCB
     tamboresPcbVigentes: { type: Number, default: 0 },
     tamboresPcbDaniados: { type: Number, default: 0 },
     tamboresPcbVencidos: { type: Number, default: 0 },
-    // Detalle tambores Pesticida
-    tamboresPesticidaVigentes: { type: Number, default: 0 },
-    tamboresPesticidaDaniados: { type: Number, default: 0 },
-    tamboresPesticidaVencidos: { type: Number, default: 0 },
-    // Totales por tipo de bolsones
-    bolsonesPcb: { type: Number, default: 0 },
-    bolsonesPesticida: { type: Number, default: 0 },
-    // Detalle bolsones PCB
-    bolsonesPcbVigentes: { type: Number, default: 0 },
-    bolsonesPcbVencidos: { type: Number, default: 0 },
-    // Detalle bolsones Pesticida
-    bolsonesPesticidaVigentes: { type: Number, default: 0 },
-    bolsonesPesticidaVencidos: { type: Number, default: 0 },
+    // Detalle tambores Pesticidas
+    tamboresPesticidasVigentes: { type: Number, default: 0 },
+    tamboresPesticidasDaniados: { type: Number, default: 0 },
+    tamboresPesticidasVencidos: { type: Number, default: 0 },
     // Resto de productos
     palletsBigBag: { type: Number, default: 0 },
     palletsTambores: { type: Number, default: 0 },
     tirantes: { type: Number, default: 0 },
     tablas: { type: Number, default: 0 },
+    sobreTambores: { type: Number, default: 0 },
+    sobreTamboresVigentes: { type: Number, default: 0 },
+    sobreTamboresDaniados: { type: Number, default: 0 },
+    sobreTamboresVencidos: { type: Number, default: 0 },
     bines: { type: Number, default: 0 },
     absorbente: { type: Number, default: 0 },
+    bolsonesPcb: { type: Number, default: 0 },
+    bolsonesPcbVigentes: { type: Number, default: 0 },
+    bolsonesPcbVencidos: { type: Number, default: 0 },
+    bolsonesPesticidas: { type: Number, default: 0 },
+    bolsonesPesticidasVigentes: { type: Number, default: 0 },
+    bolsonesPesticidasVencidos: { type: Number, default: 0 },
   },
   { _id: false },
 );
@@ -78,38 +79,43 @@ EntrySchema.index({ month: 1, year: 1 }, { unique: true });
 
 // Subcampos que se copian del operario sin ajuste admin
 const SUB_KEYS = [
+  "sobreTamboresVigentes",
+  "sobreTamboresDaniados",
+  "sobreTamboresVencidos",
   "tamboresPcbVigentes",
   "tamboresPcbDaniados",
   "tamboresPcbVencidos",
-  "tamboresPesticidaVigentes",
-  "tamboresPesticidaDaniados",
-  "tamboresPesticidaVencidos",
+  "tamboresPesticidasVigentes",
+  "tamboresPesticidasDaniados",
+  "tamboresPesticidasVencidos",
   "bolsonesPcbVigentes",
   "bolsonesPcbVencidos",
-  "bolsonesPesticidaVigentes",
-  "bolsonesPesticidaVencidos",
+  "bolsonesPesticidasVigentes",
+  "bolsonesPesticidasVencidos",
 ];
 
 // finalStock solo cuenta vigentes para tambores y bolsones
 // Los demás productos suman operatorStock + adminAdjustment normalmente
 const VIGENTES_MAP = {
+  sobreTambores: "sobreTamboresVigentes",
   tamboresPcb: "tamboresPcbVigentes",
-  tamboresPesticida: "tamboresPesticidaVigentes",
+  tamboresPesticidas: "tamboresPesticidasVigentes",
   bolsonesPcb: "bolsonesPcbVigentes",
-  bolsonesPesticida: "bolsonesPesticidaVigentes",
+  bolsonesPesticidas: "bolsonesPesticidasVigentes",
 };
 
 const ALL_KEYS = [
   "tamboresPcb",
-  "tamboresPesticida",
+  "tamboresPesticidas",
   "bolsonesPcb",
-  "bolsonesPesticida",
+  "bolsonesPesticidas",
   "palletsBigBag",
   "palletsTambores",
-  "tirantes",
-  "tablas",
-  "bines",
+  "sobreTambores",
   "absorbente",
+  "bines",
+  "tablas",
+  "tirantes",
   ...SUB_KEYS,
 ];
 

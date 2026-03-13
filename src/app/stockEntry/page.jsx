@@ -52,11 +52,19 @@ const TAMBORES_GROUPS = [
     ],
   },
   {
-    key: "tamboresPesticida",
+    key: "tamboresPesticidas",
     subs: [
-      { key: "tamboresPesticidaVigentes", label: "Vigentes" },
-      { key: "tamboresPesticidaDaniados", label: "Dañados" },
-      { key: "tamboresPesticidaVencidos", label: "Vencidos" },
+      { key: "tamboresPesticidasVigentes", label: "Vigentes" },
+      { key: "tamboresPesticidasDaniados", label: "Dañados" },
+      { key: "tamboresPesticidasVencidos", label: "Vencidos" },
+    ],
+  },
+  {
+    key: "sobreTambores",
+    subs: [
+      { key: "sobreTamboresVigentes", label: "Vigentes" },
+      { key: "sobreTamboresDaniados", label: "Dañados" },
+      { key: "sobreTamboresVencidos", label: "Vencidos" },
     ],
   },
 ];
@@ -70,10 +78,10 @@ const BOLSONES_GROUPS = [
     ],
   },
   {
-    key: "bolsonesPesticida",
+    key: "bolsonesPesticidas",
     subs: [
-      { key: "bolsonesPesticidaVigentes", label: "Vigentes" },
-      { key: "bolsonesPesticidaVencidos", label: "Vencidos" },
+      { key: "bolsonesPesticidasVigentes", label: "Vigentes" },
+      { key: "bolsonesPesticidasVencidos", label: "Vencidos" },
     ],
   },
 ];
@@ -459,12 +467,12 @@ export default function StockEntryPage() {
               );
             })}
 
-            <div className="border-t" />
-
             {/* Productos simples */}
             {SIMPLE_KEYS.map((key) => (
               <div key={key} className="space-y-1">
-                <Label htmlFor={key}>{PRODUCT_LABELS[key]}</Label>
+                <Label className="text-base font-semibold" htmlFor={key}>
+                  {PRODUCT_LABELS[key]}
+                </Label>
                 <Input
                   id={key}
                   type="number"

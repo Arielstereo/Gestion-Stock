@@ -10,12 +10,12 @@ import {
   CheckCircle2,
   AlertTriangle,
   XCircle,
-  ShoppingCart,
   Wrench,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PRODUCT_LABELS } from "@/context/StockContext";
 import { cn } from "@/lib/utils";
+import { ShoppingCart } from "lucide-react";
 
 // ── Configuración de subcategorías por producto ───────────────────────────
 const PRODUCT_GROUPS = [
@@ -37,16 +37,16 @@ const PRODUCT_GROUPS = [
     ],
   },
   {
-    key: "bolsonesPesticida",
+    key: "bolsonesPesticidas",
     subs: [
       {
-        key: "bolsonesPesticidaVigentes",
+        key: "bolsonesPesticidasVigentes",
         label: "Vigentes",
         icon: CheckCircle2,
         color: "text-black",
       },
       {
-        key: "bolsonesPesticidaVencidos",
+        key: "bolsonesPesticidasVencidos",
         label: "Vencidos",
         icon: XCircle,
         color: "text-muted-foreground",
@@ -77,28 +77,52 @@ const PRODUCT_GROUPS = [
     ],
   },
   {
-    key: "tamboresPesticida",
+    key: "tamboresPesticidas",
     subs: [
       {
-        key: "tamboresPesticidaVigentes",
+        key: "tamboresPesticidasVigentes",
         label: "Vigentes",
         icon: CheckCircle2,
         color: "text-black",
       },
       {
-        key: "tamboresPesticidaDaniados",
+        key: "tamboresPesticidasDaniados",
         label: "Dañados",
         icon: AlertTriangle,
         color: "text-muted-foreground",
       },
       {
-        key: "tamboresPesticidaVencidos",
+        key: "tamboresPesticidasVencidos",
         label: "Vencidos",
         icon: XCircle,
         color: "text-muted-foreground",
       },
     ],
   },
+  {
+    key: "sobreTambores",
+    subs: [
+      {
+        key: "sobreTamboresVigentes",
+        label: "Sobretambores vigentes",
+        icon: CheckCircle2,
+        color: "text-black",
+      },
+      {
+        key: "sobreTamboresDaniados",
+        label: "Sobretambores dañados",
+        icon: AlertTriangle,
+        color: "text-muted-foreground",
+      },
+      {
+        key: "sobreTamboresVencidos",
+        label: "Sobretambores vencidos",
+        icon: XCircle,
+        color: "text-muted-foreground",
+      },
+    ],
+  },
+
   // Productos simples (sin subcategorías)
   { key: "absorbente" },
   { key: "bines" },
@@ -164,6 +188,36 @@ function SubRow({ sub, value }) {
   );
 }
 
+function AdjRow({ qty }) {
+  const isPositive = qty > 0;
+  return (
+    <div className="flex items-center justify-between py-1 pl-6 border-b border-dashed last:border-0">
+      <div
+        className={cn(
+          "flex items-center gap-1.5 text-sm font-medium",
+          isPositive ? "text-green-600" : "text-red-500",
+        )}
+      >
+        {isPositive ? (
+          <TrendingUp className="h-3.5 w-3.5" />
+        ) : (
+          <TrendingDown className="h-3.5 w-3.5" />
+        )}
+        <span>{isPositive ? "Compra" : "Consumo"}</span>
+      </div>
+      <span
+        className={cn(
+          "font-bold text-sm tabular-nums",
+          isPositive ? "text-green-600" : "text-red-500",
+        )}
+      >
+        {isPositive ? "+" : ""}
+        {qty}
+      </span>
+    </div>
+  );
+}
+
 function ProductCard({ group, entry }) {
   const op = entry.operatorStock ?? {};
   const final = entry.finalStock ?? op;
@@ -172,6 +226,7 @@ function ProductCard({ group, entry }) {
   const totalFinal = final[group.key] ?? 0;
   const adjVal = adj[group.key] ?? 0;
   const isSimple = SIMPLE_KEYS.includes(group.key);
+  const hasAdj = adjVal !== 0;
 
   return (
     <div className="border rounded-lg overflow-hidden">
@@ -183,35 +238,25 @@ function ProductCard({ group, entry }) {
             {PRODUCT_LABELS[group.key]}
           </span>
         </div>
-        <div className="flex items-center gap-3">
-          {adjVal !== 0 && (
-            <span
-              className={cn(
-                "text-xs font-medium flex items-center gap-0.5",
-                adjVal > 0 ? "text-green-600" : "text-red-500",
-              )}
-            >
-              {adjVal > 0 ? (
-                <TrendingUp className="h-3 w-3" />
-              ) : (
-                <TrendingDown className="h-3 w-3" />
-              )}
-              {adjVal > 0 ? "+" : ""}
-              {adjVal}
-            </span>
-          )}
-          <span className="text-lg font-bold text-black tabular-nums">
-            {totalFinal}
-          </span>
-        </div>
+        <span className="text-lg font-bold text-black tabular-nums">
+          {totalFinal}
+        </span>
       </div>
 
-      {/* Subcategorías */}
+      {/* Subcategorías + ajuste debajo */}
       {!isSimple && group.subs && (
         <div className="px-4 py-1">
           {group.subs.map((sub) => (
             <SubRow key={sub.key} sub={sub} value={op[sub.key] ?? 0} />
           ))}
+          {hasAdj && <AdjRow qty={adjVal} />}
+        </div>
+      )}
+
+      {/* Productos simples con ajuste */}
+      {isSimple && hasAdj && (
+        <div className="px-4 py-1">
+          <AdjRow qty={adjVal} />
         </div>
       )}
     </div>

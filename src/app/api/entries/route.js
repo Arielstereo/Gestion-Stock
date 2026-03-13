@@ -3,26 +3,31 @@ import Entry from "@/models/Entry";
 import { NextResponse } from "next/server";
 
 const PRODUCT_KEYS = [
+  "absorbente",
+  "bines",
+  "sobreTambores",
+  "sobreTamboresVigentes",
+  "sobreTamboresDaniados",
+  "sobreTamboresVencidos",
+  "bolsonesPcb",
+  "bolsonesPcbVigentes",
+  "bolsonesPcbVencidos",
+  "bolsonesPesticidas",
+  "bolsonesPesticidasVigentes",
+  "bolsonesPesticidasVencidos",
+  "palletsBigBag",
+  "palletsTambores",
+  "sobreTambores",
+  "tablas",
   "tamboresPcb",
-  "tamboresPesticida",
   "tamboresPcbVigentes",
   "tamboresPcbDaniados",
   "tamboresPcbVencidos",
-  "tamboresPesticidaVigentes",
-  "tamboresPesticidaDaniados",
-  "tamboresPesticidaVencidos",
-  "bolsonesPcb",
-  "bolsonesPesticida",
-  "bolsonesPcbVigentes",
-  "bolsonesPcbVencidos",
-  "bolsonesPesticidaVigentes",
-  "bolsonesPesticidaVencidos",
-  "palletsBigBag",
-  "palletsTambores",
+  "tamboresPesticidas",
+  "tamboresPesticidasVigentes",
+  "tamboresPesticidasDaniados",
+  "tamboresPesticidasVencidos",
   "tirantes",
-  "tablas",
-  "bines",
-  "absorbente",
 ];
 
 export async function GET() {
@@ -93,7 +98,7 @@ export async function POST(request) {
     }
 
     // finalStock = operatorStock (sin ajuste admin aún)
-    // Los subcampos se copian tal cual desde operatorStock
+    // Los subcampos de tambores se copian tal cual desde operatorStock
     const finalStock = { ...normalizedStock };
 
     const newEntry = new Entry({
