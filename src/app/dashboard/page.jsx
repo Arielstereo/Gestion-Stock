@@ -56,12 +56,40 @@ const DashboardPage = () => {
     const capitalizado =
       periodoLabel.charAt(0).toUpperCase() + periodoLabel.slice(1);
 
-    const rows = [["Periodo", capitalizado], [], ["Producto", "Stock actual"]];
+    // Parsear consumos del adminNote — sumar por producto key
+    const parseConsumos = (adminNote = "") => {
+      const consumos = {};
+      if (!adminNote.trim()) return consumos;
+      const lines = adminNote.split("\n").filter(Boolean);
+      for (const line of lines) {
+        // Formato: "Consumo 5 Tambores PCB | Serv: ..."
+        const match = line.match(/^Consumo\s+(\d+)\s+(.+?)\s*\|/);
+        if (match) {
+          const qty = parseInt(match[1]);
+          const label = match[2].trim();
+          // Buscar el key por label
+          const key = Object.entries(PRODUCT_LABELS).find(
+            ([, v]) => v === label,
+          )?.[0];
+          if (key) consumos[key] = (consumos[key] || 0) + qty;
+        }
+      }
+      return consumos;
+    };
+
+    const consumos = parseConsumos(entry.adminNote);
+
+    const rows = [
+      ["Periodo", capitalizado],
+      [],
+      ["Producto", "Stock actual", "Consumos"],
+    ];
 
     for (const key of TABLE_KEYS) {
       rows.push([
         PRODUCT_LABELS[key],
         entry.finalStock?.[key] ?? entry.operatorStock?.[key] ?? 0,
+        consumos[key] ? -consumos[key] : "",
       ]);
     }
 
@@ -116,11 +144,13 @@ const DashboardPage = () => {
                 <FileSpreadsheet className="h-5 w-5 text-primary" />
                 Historial de Stock
               </CardTitle>
-              <CardDescription className="mt-2">
-                {entries.length} registro cargado
-                {entries.length !== 1 ? "s" : ""} — hacé click en un mes para
-                ver el detalle. Descarga el stock en Excel para compartirlo o
-                archivarlo.
+              <CardDescription className="m-2">
+                {entries.length}{" "}
+                {entries.length !== 1
+                  ? "registros cargados"
+                  : "registro cargado"}{" "}
+                — hacé click en un mes para ver el detalle. Descarga el stock en
+                Excel para compartirlo o archivarlo.
               </CardDescription>
             </div>
             <div className="relative w-full md:w-64">
