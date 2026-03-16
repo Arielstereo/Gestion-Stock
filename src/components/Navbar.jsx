@@ -17,7 +17,7 @@ const navItems = [
     label: "Ver Datos",
     desktopOnly: true,
   },
-  { href: "/admin", icon: Settings, label: "Admin", desktopOnly: true },
+  { href: "/admin", icon: Settings, label: "Panel Admin", desktopOnly: true },
 ];
 
 const mobileItems = navItems.filter((item) => !item.desktopOnly);
@@ -42,9 +42,9 @@ const Navbar = ({ children }) => {
             <Link
               key={item.href}
               href={item.href}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors bg-[#e07026] font-medium hover:bg-[#c65b1f] text-white"
+              className="flex items-center gap-2 px-4 py-2 rounded-lg border border-white font-medium hover:bg-white text-sm text-white hover:text-blue-800 transition-colors"
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className="h-4 w-4" />
               <span>{item.label}</span>
             </Link>
           ))}

@@ -35,6 +35,7 @@ import {
 import { useStock, PRODUCT_KEYS, PRODUCT_LABELS } from "@/context/StockContext";
 import { cn } from "@/lib/utils";
 import LoadingButton from "@/components/LoadingButton";
+import Link from "next/link";
 
 // ── Constantes ────────────────────────────────────────────────────────────
 const MOVEMENT_TYPES = [
@@ -260,7 +261,7 @@ export default function AdminPage() {
 
   // ── Render ─────────────────────────────────────────────────────────────
   return (
-    <div className="container mx-auto px-4 py-6 max-w-3xl space-y-6">
+    <div className="container mx-auto px-4 py-6 max-w-6xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <SlidersHorizontal className="h-6 w-6 text-primary" />
@@ -326,7 +327,14 @@ export default function AdminPage() {
                 </CardTitle>
                 <CardDescription className="text-yellow-700">
                   El conteo del mes actual difiere del stock final del mes
-                  anterior.
+                  anterior. Ir a{" "}
+                  <Link
+                    href={`/dashboard`}
+                    className=" text-blue-600 font-bold hover:underline"
+                  >
+                    Ver datos
+                  </Link>{" "}
+                  para revisar movimientos y ajustes aplicados.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -379,7 +387,7 @@ export default function AdminPage() {
 
           {/* Sin mes anterior disponible */}
           {!prevEntry && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/40 rounded-lg px-4 py-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-blue-50 rounded-lg px-4 py-3">
               <AlertCircle className="h-4 w-4 shrink-0" />
               No hay registro del mes anterior para comparar.
             </div>
@@ -396,325 +404,330 @@ export default function AdminPage() {
             </div>
           )}
 
-          {/* ── Tabla stock actual ───────────────────────────────────────── */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base flex items-center gap-2">
-                <ArrowUpDown className="h-4 w-4" />
-                Stock actual del período
-              </CardTitle>
-              <CardDescription className="capitalize">
-                {formatEntryDate(selectedEntry)}
-                {selectedEntry.operatorSubmittedAt && (
-                  <span className="ml-2 text-xs">
-                    · Conteo:{" "}
-                    {format(
-                      new Date(selectedEntry.operatorSubmittedAt),
-                      "dd/MM/yyyy HH:mm",
-                    )}
-                  </span>
-                )}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2 font-medium text-muted-foreground">
-                      Producto
-                    </th>
-                    <th className="text-right py-2 font-medium text-muted-foreground">
-                      Operario
-                    </th>
-                    <th className="text-right py-2 font-medium text-muted-foreground">
-                      Ajuste
-                    </th>
-                    <th className="text-right py-2 font-medium">Final</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {PRODUCT_KEYS.map((key) => {
-                    const op = getOpValue(selectedEntry.operatorStock, key);
-                    const adj = selectedEntry.adminAdjustment?.[key] ?? 0;
-                    const fin = selectedEntry.finalStock?.[key] ?? op;
-                    return (
-                      <tr key={key} className="border-b last:border-0">
-                        <td className="py-2 text-muted-foreground">
-                          {PRODUCT_LABELS[key]}
-                        </td>
-                        <td className="py-2 text-right font-mono">{op}</td>
-                        <td className="py-2 text-right">
-                          <DiffBadge value={adj} />
-                        </td>
-                        <td className="py-2 text-right font-bold">{fin}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-
-              {selectedEntry.adminNote && (
-                <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                  <p className="text-xs text-yellow-700 font-medium flex items-center gap-1 mb-1">
-                    <History className="h-3 w-3" /> Movimientos registrados:
-                  </p>
-                  <pre className="text-xs text-yellow-800 whitespace-pre-wrap font-sans">
-                    {selectedEntry.adminNote}
-                  </pre>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* ── Formulario de movimientos ─────────────────────────────────── */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Registrar movimientos</CardTitle>
-              <CardDescription>
-                Cada fila es un movimiento. Podés agregar varios antes de
-                guardar.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {movements.map((m, i) => (
-                <div
-                  key={i}
-                  className="border rounded-lg p-4 space-y-3 bg-muted/30"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-muted-foreground">
-                      Movimiento {i + 1}
+          {/* ── Grilla: tabla izquierda + formulario derecha ───────────── */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            {/* ── Tabla stock actual ───────────────────────────────────────── */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <ArrowUpDown className="h-4 w-4" />
+                  Stock actual del período
+                </CardTitle>
+                <CardDescription className="capitalize">
+                  {formatEntryDate(selectedEntry)}
+                  {selectedEntry.operatorSubmittedAt && (
+                    <span className="ml-2 text-xs">
+                      · Conteo:{" "}
+                      {format(
+                        new Date(selectedEntry.operatorSubmittedAt),
+                        "dd/MM/yyyy HH:mm",
+                      )}
                     </span>
-                    {movements.length > 1 && (
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-6 w-6"
-                        onClick={() => removeMovement(i)}
+                  )}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-2 font-medium text-muted-foreground">
+                        Producto
+                      </th>
+                      <th className="text-right py-2 font-medium text-muted-foreground">
+                        Operario
+                      </th>
+                      <th className="text-right py-2 font-medium text-muted-foreground">
+                        Ajuste
+                      </th>
+                      <th className="text-right py-2 font-medium">Final</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {PRODUCT_KEYS.map((key) => {
+                      const op = getOpValue(selectedEntry.operatorStock, key);
+                      const adj = selectedEntry.adminAdjustment?.[key] ?? 0;
+                      const fin = selectedEntry.finalStock?.[key] ?? op;
+                      return (
+                        <tr key={key} className="border-b last:border-0">
+                          <td className="py-2 text-muted-foreground">
+                            {PRODUCT_LABELS[key]}
+                          </td>
+                          <td className="py-2 text-right font-mono">{op}</td>
+                          <td className="py-2 text-right">
+                            <DiffBadge value={adj} />
+                          </td>
+                          <td className="py-2 text-right font-bold">{fin}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+
+                {selectedEntry.adminNote && (
+                  <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                    <p className="text-xs text-yellow-700 font-medium flex items-center gap-1 mb-1">
+                      <History className="h-3 w-3" /> Movimientos registrados:
+                    </p>
+                    <pre className="text-xs text-yellow-800 whitespace-pre-wrap font-sans">
+                      {selectedEntry.adminNote}
+                    </pre>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* ── Formulario de movimientos ─────────────────────────────────── */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">
+                  Registrar movimientos
+                </CardTitle>
+                <CardDescription>
+                  Cada fila es un movimiento. Podés agregar varios antes de
+                  guardar.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {movements.map((m, i) => (
+                  <div
+                    key={i}
+                    className="border rounded-lg p-4 space-y-3 bg-muted/30"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-muted-foreground">
+                        Movimiento {i + 1}
+                      </span>
+                      {movements.length > 1 && (
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 w-6"
+                          onClick={() => removeMovement(i)}
+                        >
+                          <Trash2 className="h-3 w-3 text-destructive" />
+                        </Button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {/* Producto */}
+                      <div className="space-y-1">
+                        <Label className="text-xs">Producto</Label>
+                        <Select
+                          value={m.product}
+                          onValueChange={(v) => updateMovement(i, "product", v)}
+                        >
+                          <SelectTrigger
+                            className={cn(
+                              "h-10",
+                              fieldErrors[i]?.product && "border-destructive",
+                            )}
+                          >
+                            <SelectValue placeholder="Seleccioná..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {PRODUCT_KEYS.map((key) => (
+                              <SelectItem key={key} value={key}>
+                                {PRODUCT_LABELS[key]}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {fieldErrors[i]?.product && (
+                          <p className="text-xs text-destructive">
+                            {fieldErrors[i].product}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Tipo de movimiento */}
+                      <div className="space-y-1">
+                        <Label className="text-xs">Tipo de movimiento</Label>
+                        <Select
+                          value={m.movementType}
+                          onValueChange={(v) =>
+                            updateMovement(i, "movementType", v)
+                          }
+                        >
+                          <SelectTrigger
+                            className={cn(
+                              "h-10",
+                              fieldErrors[i]?.movementType &&
+                                "border-destructive",
+                            )}
+                          >
+                            <SelectValue placeholder="Seleccioná..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {MOVEMENT_TYPES.map((t) => (
+                              <SelectItem key={t.value} value={t.value}>
+                                {t.sign === 1 ? "➕" : "➖"} {t.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {fieldErrors[i]?.movementType && (
+                          <p className="text-xs text-destructive">
+                            {fieldErrors[i].movementType}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Cantidad */}
+                      <div className="space-y-1">
+                        <Label className="text-xs">Cantidad</Label>
+                        <Input
+                          type="number"
+                          min="1"
+                          inputMode="numeric"
+                          value={m.quantity}
+                          onChange={(e) =>
+                            updateMovement(i, "quantity", e.target.value)
+                          }
+                          placeholder="0"
+                          className={cn(
+                            "h-10",
+                            fieldErrors[i]?.quantity && "border-destructive",
+                          )}
+                        />
+                        {fieldErrors[i]?.quantity && (
+                          <p className="text-xs text-destructive">
+                            {fieldErrors[i].quantity}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Servicio */}
+                      <div className="space-y-1">
+                        <Label className="text-xs">Servicio</Label>
+                        <Select
+                          value={m.service}
+                          onValueChange={(v) => updateMovement(i, "service", v)}
+                        >
+                          <SelectTrigger
+                            className={cn(
+                              "h-10",
+                              fieldErrors[i]?.service && "border-destructive",
+                            )}
+                          >
+                            <SelectValue placeholder="Seleccioná..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {SERVICE_TYPES.map((s) => (
+                              <SelectItem key={s.value} value={s.value}>
+                                {s.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {fieldErrors[i]?.service && (
+                          <p className="text-xs text-destructive">
+                            {fieldErrors[i].service}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* Proyecto */}
+                      <div className="space-y-1 sm:col-span-2">
+                        <Label className="text-xs">
+                          Proyecto{" "}
+                          <span className="text-muted-foreground font-normal">
+                            (opcional)
+                          </span>
+                        </Label>
+                        <Input
+                          type="text"
+                          value={m.project}
+                          onChange={(e) =>
+                            updateMovement(i, "project", e.target.value)
+                          }
+                          placeholder="Nombre del proyecto..."
+                          className="h-10"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Preview de la fila */}
+                    {m.product && m.movementType && m.quantity && (
+                      <div
+                        className={cn(
+                          "text-xs rounded px-2 py-1 font-medium",
+                          MOVEMENT_TYPES.find((t) => t.value === m.movementType)
+                            ?.sign === 1
+                            ? "bg-green-50 text-green-700"
+                            : "bg-red-50 text-red-700",
+                        )}
                       >
-                        <Trash2 className="h-3 w-3 text-destructive" />
-                      </Button>
+                        {MOVEMENT_TYPES.find((t) => t.value === m.movementType)
+                          ?.sign === 1
+                          ? "+"
+                          : "−"}
+                        {m.quantity} {PRODUCT_LABELS[m.product]}
+                        {" · "}
+                        {
+                          MOVEMENT_TYPES.find((t) => t.value === m.movementType)
+                            ?.label
+                        }
+                        {m.service &&
+                          ` · ${SERVICE_TYPES.find((s) => s.value === m.service)?.label}`}
+                        {m.project && ` · ${m.project}`}
+                      </div>
                     )}
                   </div>
+                ))}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {/* Producto */}
-                    <div className="space-y-1">
-                      <Label className="text-xs">Producto</Label>
-                      <Select
-                        value={m.product}
-                        onValueChange={(v) => updateMovement(i, "product", v)}
-                      >
-                        <SelectTrigger
-                          className={cn(
-                            "h-10",
-                            fieldErrors[i]?.product && "border-destructive",
-                          )}
-                        >
-                          <SelectValue placeholder="Seleccioná..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {PRODUCT_KEYS.map((key) => (
-                            <SelectItem key={key} value={key}>
-                              {PRODUCT_LABELS[key]}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {fieldErrors[i]?.product && (
-                        <p className="text-xs text-destructive">
-                          {fieldErrors[i].product}
-                        </p>
-                      )}
-                    </div>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={addMovement}
+                  className="w-full gap-2 border-dashed cursor-pointer"
+                >
+                  <Plus className="h-4 w-4" />
+                  Agregar otro movimiento
+                </Button>
 
-                    {/* Tipo de movimiento */}
-                    <div className="space-y-1">
-                      <Label className="text-xs">Tipo de movimiento</Label>
-                      <Select
-                        value={m.movementType}
-                        onValueChange={(v) =>
-                          updateMovement(i, "movementType", v)
-                        }
-                      >
-                        <SelectTrigger
-                          className={cn(
-                            "h-10",
-                            fieldErrors[i]?.movementType &&
-                              "border-destructive",
-                          )}
-                        >
-                          <SelectValue placeholder="Seleccioná..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {MOVEMENT_TYPES.map((t) => (
-                            <SelectItem key={t.value} value={t.value}>
-                              {t.sign === 1 ? "➕" : "➖"} {t.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {fieldErrors[i]?.movementType && (
-                        <p className="text-xs text-destructive">
-                          {fieldErrors[i].movementType}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Cantidad */}
-                    <div className="space-y-1">
-                      <Label className="text-xs">Cantidad</Label>
-                      <Input
-                        type="number"
-                        min="1"
-                        inputMode="numeric"
-                        value={m.quantity}
-                        onChange={(e) =>
-                          updateMovement(i, "quantity", e.target.value)
-                        }
-                        placeholder="0"
-                        className={cn(
-                          "h-10",
-                          fieldErrors[i]?.quantity && "border-destructive",
-                        )}
-                      />
-                      {fieldErrors[i]?.quantity && (
-                        <p className="text-xs text-destructive">
-                          {fieldErrors[i].quantity}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Servicio */}
-                    <div className="space-y-1">
-                      <Label className="text-xs">Servicio</Label>
-                      <Select
-                        value={m.service}
-                        onValueChange={(v) => updateMovement(i, "service", v)}
-                      >
-                        <SelectTrigger
-                          className={cn(
-                            "h-10",
-                            fieldErrors[i]?.service && "border-destructive",
-                          )}
-                        >
-                          <SelectValue placeholder="Seleccioná..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {SERVICE_TYPES.map((s) => (
-                            <SelectItem key={s.value} value={s.value}>
-                              {s.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      {fieldErrors[i]?.service && (
-                        <p className="text-xs text-destructive">
-                          {fieldErrors[i].service}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* Proyecto */}
-                    <div className="space-y-1 sm:col-span-2">
-                      <Label className="text-xs">
-                        Proyecto{" "}
-                        <span className="text-muted-foreground font-normal">
-                          (opcional)
-                        </span>
-                      </Label>
-                      <Input
-                        type="text"
-                        value={m.project}
-                        onChange={(e) =>
-                          updateMovement(i, "project", e.target.value)
-                        }
-                        placeholder="Nombre del proyecto..."
-                        className="h-10"
-                      />
-                    </div>
+                {negativeFields.length > 0 && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 space-y-1">
+                    <p className="text-sm text-red-700 font-medium flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                      El ajuste dejaría stock negativo en:
+                    </p>
+                    <ul className="text-sm text-red-700 list-disc pl-5">
+                      {negativeFields.map((k) => (
+                        <li key={k}>{PRODUCT_LABELS[k]}</li>
+                      ))}
+                    </ul>
                   </div>
+                )}
 
-                  {/* Preview de la fila */}
-                  {m.product && m.movementType && m.quantity && (
-                    <div
-                      className={cn(
-                        "text-xs rounded px-2 py-1 font-medium",
-                        MOVEMENT_TYPES.find((t) => t.value === m.movementType)
-                          ?.sign === 1
-                          ? "bg-green-50 text-green-700"
-                          : "bg-red-50 text-red-700",
-                      )}
-                    >
-                      {MOVEMENT_TYPES.find((t) => t.value === m.movementType)
-                        ?.sign === 1
-                        ? "+"
-                        : "−"}
-                      {m.quantity} {PRODUCT_LABELS[m.product]}
-                      {" · "}
-                      {
-                        MOVEMENT_TYPES.find((t) => t.value === m.movementType)
-                          ?.label
-                      }
-                      {m.service &&
-                        ` · ${SERVICE_TYPES.find((s) => s.value === m.service)?.label}`}
-                      {m.project && ` · ${m.project}`}
-                    </div>
-                  )}
-                </div>
-              ))}
+                {apiError && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
+                    <p className="text-sm text-red-700">{apiError}</p>
+                  </div>
+                )}
+                {success && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
+                    <p className="text-sm text-green-700">
+                      Ajuste aplicado correctamente
+                    </p>
+                  </div>
+                )}
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={addMovement}
-                className="w-full gap-2 border-dashed"
-              >
-                <Plus className="h-4 w-4" />
-                Agregar otro movimiento
-              </Button>
-
-              {negativeFields.length > 0 && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 space-y-1">
-                  <p className="text-sm text-red-700 font-medium flex items-center gap-2">
-                    <AlertCircle className="h-4 w-4 shrink-0" />
-                    El ajuste dejaría stock negativo en:
-                  </p>
-                  <ul className="text-sm text-red-700 list-disc pl-5">
-                    {negativeFields.map((k) => (
-                      <li key={k}>{PRODUCT_LABELS[k]}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {apiError && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
-                  <p className="text-sm text-red-700">{apiError}</p>
-                </div>
-              )}
-              {success && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />
-                  <p className="text-sm text-green-700">
-                    Ajuste aplicado correctamente
-                  </p>
-                </div>
-              )}
-
-              <LoadingButton
-                onClick={handleSubmit}
-                isLoading={isSubmitting}
-                loadingText="Guardando..."
-                size="lg"
-                className="w-full h-12 gap-2"
-              >
-                <SlidersHorizontal className="h-5 w-5" />
-                Aplicar Ajustes
-              </LoadingButton>
-            </CardContent>
-          </Card>
+                <LoadingButton
+                  onClick={handleSubmit}
+                  isLoading={isSubmitting}
+                  loadingText="Guardando..."
+                  size="lg"
+                  className="w-full h-12 gap-2 bg-blue-800 hover:bg-blue-600 cursor-pointer"
+                >
+                  <SlidersHorizontal className="h-5 w-5" />
+                  Aplicar Ajustes
+                </LoadingButton>
+              </CardContent>
+            </Card>
+          </div>
         </>
       )}
     </div>
